@@ -31,21 +31,23 @@ if not st.session_state.logged:
 
 st.sidebar.success("¡Conectado!")
 
-# LOGO EN ESQUINA SUPERIOR DERECHA - VERSIÓN ÉPICA
-logo_col = st.columns([5, 1.3])[1]  # crea una columna chiquita a la derecha
-with logo_col:
-    try:
-        st.image("logo_rhg.jpg", width=140, use_column_width=True)
-    except:
-        st.markdown(
-            """
-            <div style="text-align: right; padding: 10px;">
-                <h2 style="color: #E91E63;">RHG</h2>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+# ====== HEADER PROFESIONAL CON LOGO A LA DERECHA (QUEDA DE 10) ======
+st.markdown(
+    """
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+        <div>
+            <h1 style="margin: 0; color: #1e293b;">RHG Laboratorios - ERP</h1>
+        </div>
+        <div>
+            <img src="logo_rhg.jpg" width="180" style="border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
+# Línea separadora elegante
+st.markdown("---")
 
 PRODUCTOS = {
     "COL-MAR": "Colágeno Lumivit Maracuyá 4kg", "COL-NAT": "Colágeno Lumivit Natural 4kg",
