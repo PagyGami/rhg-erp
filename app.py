@@ -55,7 +55,7 @@ with tab1:
     
     # Cargar ingredientes
     try:
-        ingredientes = supabase.table("ingredientes").select("*").order("nombre").execute().data
+        ingredientes = supabase.table("ingredientes").schema("public").select("*").order("nombre").execute().data
         df = pd.DataFrame(ingredientes)
     except:
         st.error("No se pudo conectar a la tabla ingredientes")
@@ -76,7 +76,7 @@ with tab1:
                 nueva_unidad = st.selectbox("Unidad", ["g", "kg", "mg", "piezas", "ml"])
                 nuevo_seguridad = st.number_input("Stock de seguridad", min_value=0)
                 if st.button("Guardar nuevo"):
-                    supabase.table("ingredientes").insert({
+                    supabase.table("ingredientes").schema("public").insert({
                         "nombre": nuevo_nombre,
                         "tipo": nuevo_tipo,
                         "stock_actual": 0,
