@@ -14,7 +14,7 @@ if not st.session_state.logged:
     # --- BARRA LATERAL (Login) ---
     with st.sidebar:
         try:
-            st.image("logo_rhg.png", width=150) 
+            st.image("logo_rhg.jpg", width=150) 
         except:
             st.title("RHG Laboratorios") 
             
