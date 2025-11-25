@@ -3,26 +3,20 @@ import pandas as pd
 from datetime import date, datetime, timedelta
 from supabase import create_client
 
-# ============= SUPABASE (TU PROYECTO) =============
-# Asegúrate de que tu clave y URL estén correctas aquí.
-supabase = create_client(
-    "https://llatouvgqplaxvwjfyhl.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsYXRvdXZncXBsYXh2d2pmeWhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwMjAxMzYsImV4cCI6MjA3OTU5NjEzNi5d.oK7K0rEikk6FB6Dt8-uSuXAN-xiOfxiILjaIqWbo6WU"
-)
+# ... (imports y conexión a Supabase se mantienen arriba)
 
-# ============= LOGIN CON LOGO =============
+# ============= LOGIN CON LOGO Y FONDO =============
 if "logged" not in st.session_state:
     st.session_state.logged = False
 
 if not st.session_state.logged:
     
-    # Colocamos el login en la barra lateral para que la pantalla principal quede limpia
+    # --- BARRA LATERAL (Login) ---
     with st.sidebar:
-        # AQUI VA EL LOGO DE LA EMPRESA
         try:
-            st.image("logo_rhg.jpg", width=150) 
+            st.image("logo_rhg.png", width=150) 
         except:
-            st.title("RHG Laboratorios") # Título de respaldo si el logo no carga
+            st.title("RHG Laboratorios") 
             
         st.subheader("Acceso al Sistema ERP")
         
@@ -40,7 +34,9 @@ if not st.session_state.logged:
                 st.rerun()
             else:
                 st.error("Usuario o contraseña incorrectos")
-# --- CUERPO PRINCIPAL (Parte blanca) ---
+
+    # --- CUERPO PRINCIPAL (Parte blanca) ---
+    # Aquí puedes agregar el fondo o la imagen principal que quieres que se vea.
     st.image("fondo_erp.png", 
              caption="RHG Laboratorios | Control total de producción.", 
              use_column_width=True) # use_column_width=True para que ocupe todo el ancho
@@ -49,9 +45,7 @@ if not st.session_state.logged:
     st.stop() 
 
 st.sidebar.success(f"¡Conectado como {st.session_state.role.upper()}!")
-    st.stop() # Detiene la ejecución de la app principal hasta hacer login
 
-st.sidebar.success(f"¡Conectado como {st.session_state.role.upper()}!")
 
 # ============= TUS PRODUCTOS REALES (Mantenemos esta lista para el resto del código) =============
 PRODUCTOS = {
