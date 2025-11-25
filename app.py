@@ -117,3 +117,87 @@ with tab4:
                 st.success("¡Entrega registrada!")
     else:
         st.info("No hay P.T. disponibles")
+        st.title("🚀 PRODUCCIÓN MÁGICA - 150 FRASCOS EN 1 CLIC")
+
+# Conexión a Supabase (ya la tienes, solo copia tu URL y key)
+supabase_client = supabase.create_client(
+    st.secrets["supabase_url"],
+    st.secrets["supabase_anon_key"]
+)
+
+# Lista de productos (los mismos que ya cargamos)
+productos = {
+    "COL-MAR": "Colágeno Maracuyá 4kg",
+    "COL-NAT": "Colágeno Natural 4kg",
+    "COL-ARA": "Colágeno Arándano 4kg",
+    "COL-NAR": "Colágeno Naranja 4kg",
+    "COL-FRE": "Colágeno Fresa 4kg",
+    "FLEXMAX60": "Flex Max 60 tabletas",
+    "VITC90": "Vitamina C 90 cápsulas",
+    "DTX500": "Detox 500mg",
+    "MAG60": "Magnesio Complex",
+    "DTX3060": "Detox 30/60 cápsulas"
+}
+
+producto = st.selectbox("Selecciona el producto a producir (lote de 150 frascos)", 
+                       options=list(productos.keys()), 
+                       format_func=lambda x: productos[x])
+
+lote = st.text_input("Lote (opcional, si no pones nada se genera automático)", "")
+
+if st.button("🔥 CALCULAR Y PRODUCIR 150 FRASCOS", type="primary"):
+    with st.spinner("Revisando inventario..."):
+        # 1. Traer fórmula completa
+        formula = supabase_client.table("formulas")\
+            .select("ingrediente_id, cantidad_por_unidad, unidad_medida, ingredientes(nombre, stock_actual)")\
+            .eq("producto_id", supabase_client.table("producto_terminado").select("id").eq("codigo", producto).execute().data[0]["id"])\
+            .execute().data
+
+        # 2. Calcular cuánto necesitamos para 150 frascos
+        necesidades = []
+        faltan = []
+        for item in formula:
+            req = item["cantidad_por_unidad"] * 150
+            actual = item["ingredientes"]["stock_actual"] or 0
+            necesidades.append({
+                "Ingrediente": item["ingredientes"]["nombre"],
+                "Necesitas": f"{req:,.2f} {item['unidad_medida']}",
+                "Tienes": f"{actual:,.2f} {item['unidad_medida']}",
+                "Falta": req > actual
+            })
+            if req > actual:
+                faltan.append(item["ingredientes"]["nombre"])
+
+        df = pd.DataFrame(necesidades)
+
+    if faltan:
+        st.error(f"⚠️ TE FALTAN {len(faltan)} INGREDIENTES:")
+        st.dataframe(df.style.apply(lambda x: ['background: #ffcccc' if x.Falta else '' for _ in x], axis=1))
+        st.stop()
+    else:
+        st.success("✅ ¡TODO LISTO! Tienes todo el inventario")
+        st.dataframe(df)
+
+        if st.button("¡PRODUCIR LOS 150 FRASCOS AHORA! 💥", type="primary"):
+            with st.spinner("Descontando inventario y creando lote..."):
+                # Descontar todo
+                for item in formula:
+                    supabase_client.rpc("descontar_stock", {
+                        "ingrediente_id": item["ingrediente_id"],
+                        "cantidad": item["cantidad_por_unidad"] * 150
+                    }).execute()
+
+                # Crear/Sumar producto terminado
+                lote_final = lote or f"L{datetime.now().strftime('%Y%m%d')}"
+                supabase_client.table("producto_terminado").upsert({
+                    "codigo": producto,
+                    "cantidad_en_almacen": 150,
+                    "lote": lote_final,
+                    "fecha_produccion": datetime.now().isoformat(),
+                    "fecha_vencimiento": (datetime.now() + timedelta(days=730)).isoformat(),  # 2 años
+                    "status": "En almacén"
+                }, on_conflict="codigo").execute()
+
+            st.balloons()
+            st.success(f"¡PRODUCCIÓN COMPLETADA! 150 frascos de {productos[producto]} con lote {lote_final} listos en almacén 🎉")
+        
