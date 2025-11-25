@@ -46,7 +46,6 @@ with logo_col:
             unsafe_allow_html=True
         )
 
-st.title("RHG Laboratorios - ERP")
 
 PRODUCTOS = {
     "COL-MAR": "Colágeno Lumivit Maracuyá 4kg", "COL-NAT": "Colágeno Lumivit Natural 4kg",
