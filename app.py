@@ -40,7 +40,15 @@ if not st.session_state.logged:
                 st.rerun()
             else:
                 st.error("Usuario o contraseña incorrectos")
+# --- CUERPO PRINCIPAL (Parte blanca) ---
+    st.image("fondo_erp.png", 
+             caption="RHG Laboratorios | Control total de producción.", 
+             use_column_width=True) # use_column_width=True para que ocupe todo el ancho
     
+    # Detiene la ejecución de la app principal hasta hacer login
+    st.stop() 
+
+st.sidebar.success(f"¡Conectado como {st.session_state.role.upper()}!")
     st.stop() # Detiene la ejecución de la app principal hasta hacer login
 
 st.sidebar.success(f"¡Conectado como {st.session_state.role.upper()}!")
