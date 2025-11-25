@@ -84,13 +84,13 @@ st.title("RHG Laboratorios - ERP")
 # Ajustamos las pestañas para incluir las que necesitas.
 tab1, tab2, tab3 = st.tabs(["📊 Inventario MP/ME", "📦 Registrar P.I.", "🚀 Producción Mágica"])
 
-# ==================== TAB 1 - INVENTARIO MP/ME ====================
+# ==================== TAB 1 - INVENTARIO MP/ME (Corregido) ====================
 with tab1:
     st.header("Control de Inventario Materia Prima y Empaque")
     
     # Intentamos cargar los datos
     try:
-        # 1. Cargar todos los ingredientes
+        # 1. Cargar todos los ingredientes (Usando 'supabase' correctamente)
         data = supabase.table("ingredientes").select("*").order("nombre").execute().data
         df_ing = pd.DataFrame(data)
         
@@ -105,18 +105,15 @@ with tab1:
 
         st.info(f"Mostrando {len(df_filtered)} de {len(df_ing)} ingredientes totales.")
 
-        # 3. Mostrar la tabla interactiva (Solo si hay datos)
+        # 3. Mostrar la tabla interactiva
         if not df_filtered.empty:
             
-            # Solo mostramos las columnas relevantes
-            df_display = df_filtered[["nombre", "stock_actual", "unidad_medida", "stock_seguridad"]]
+            df_display = df_filtered[["nombre", "stock_actual", "unidad_medida", "stock_seguridad", "id"]] # Incluimos 'id' temporalmente
             
-            # Hacer la tabla editable para que el trabajador actualice el stock
             st.subheader("Inventario Activo (Actualiza stock aquí)")
             
-            # Utilizamos st.data_editor para permitir la edición
             edited_df = st.data_editor(
-                df_display,
+                df_display.drop(columns=['id']), # Mostramos el dataframe sin el ID
                 column_config={
                     "stock_actual": st.column_config.NumberColumn(
                         "Stock Actual",
@@ -125,7 +122,7 @@ with tab1:
                         format="%.2f",
                     ),
                 },
-                num_rows="dynamic", # Permite al usuario copiar/pegar filas
+                num_rows="dynamic",
                 use_container_width=True
             )
 
@@ -133,28 +130,44 @@ with tab1:
             if st.button("💾 Guardar Cambios de Inventario", type="primary"):
                 changes_count = 0
                 for index, row in edited_df.iterrows():
-                    original_stock = df_filtered.loc[df_filtered['nombre'] == row['nombre'], 'stock_actual'].iloc[0]
+                    # Usamos el nombre para encontrar el ID del ingrediente en el DataFrame original filtrado
+                    ingrediente_nombre = row['nombre']
+                    original_row = df_filtered[df_filtered['nombre'] == ingrediente_nombre].iloc[0]
+                    
+                    original_stock = original_row['stock_actual']
                     
                     # Verificamos si el stock cambió
                     if original_stock != row['stock_actual']:
-                        # Obtener el ID del ingrediente original para el update
-                        ingrediente_id = df_filtered.loc[df_filtered['nombre'] == row['nombre'], 'id'].iloc[0]
+                        ingrediente_id = original_row['id']
                         
-                        # Actualizar en Supabase
+                        # Actualizar en Supabase (Usando 'supabase' correctamente)
                         supabase.table("ingredientes").update({"stock_actual": row['stock_actual']}).eq("id", int(ingrediente_id)).execute()
                         changes_count += 1
 
                 if changes_count > 0:
                     st.success(f"✅ ¡Inventario actualizado! Se modificaron {changes_count} registros.")
-                    st.rerun() # Recarga la app para mostrar los datos nuevos
+                    st.rerun()
                 else:
                     st.info("No se detectaron cambios para guardar.")
         else:
             st.warning("No se encontraron ingredientes que coincidan con la búsqueda.")
             
     except Exception as e:
-        st.error(f"⚠️ Error fatal al cargar/filtrar inventario. Revisa tus tablas en Supabase. Error: {e}")
+        st.error(f"⚠️ Error al cargar/filtrar inventario. Revisa tus tablas. Error: {e}")
         st.warning("Asegúrate de haber corrido el último SQL para crear e insertar los ingredientes.")
+
+# ==================== VISTA DE PRODUCTO TERMINADO (Se mantiene simple) ====================
+    st.subheader("Producto Terminado en Almacén")
+    try:
+        # Usando 'supabase' correctamente
+        pt = supabase.table("producto_terminado").select("*").eq("status", "En almacén").execute().data
+        if pt:
+            df_pt = pd.DataFrame(pt)
+            st.dataframe(df_pt[["codigo", "nombre", "cantidad_en_almacen", "lote"]], use_container_width=True)
+        else:
+            st.info("No hay productos terminados en almacén.")
+    except:
+        st.info("Error al cargar producto terminado.")
 
 # ==================== VISTA DE PRODUCTO TERMINADO (La dejamos en otra columna por ahora) ====================
     st.subheader("Producto Terminado en Almacén")
