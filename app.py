@@ -94,7 +94,10 @@ with tab1:
     st.subheader("Producto Terminado en Almacén")
     try:
         pt = supabase.table("producto_terminado").select("codigo,nombre,cantidad_en_almacen,lote").eq("status","En almacén").execute().data
-        st.dataframe(pt, use_container_width=True) if pt else st.info("No hay stock")
+        if pt:  # ← Aquí estaba el error
+            st.dataframe(pt, use_container_width=True)
+        else:
+            st.info("No hay stock de producto terminado")
     except:
         st.info("Sin datos de producto terminado")
 
