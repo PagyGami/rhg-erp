@@ -58,7 +58,6 @@ PRODUCTOS = {
 }
 
 st.set_page_config(page_title="RHG ERP", layout="wide")
-st.title("RHG Laboratorios - ERP")
 
 tab1, tab2, tab3 = st.tabs(["Inventario MP/ME", "Registrar P.I.", "Producción Mágica"])
 
