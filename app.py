@@ -37,7 +37,7 @@ if not st.session_state.logged:
 
     # --- CUERPO PRINCIPAL (Parte blanca) ---
     # Aquí puedes agregar el fondo o la imagen principal que quieres que se vea.
-    st.image("fondo_erp.png", 
+    st.image("fondo_erp.jpg", 
              caption="RHG Laboratorios | Control total de producción.", 
              use_column_width=True) # use_column_width=True para que ocupe todo el ancho
     
